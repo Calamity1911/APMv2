@@ -1,14 +1,20 @@
-TODO's 5/1/2024
+TODO's 5/3/2024
 
 * See comments in "init_webserver()", around web.cpp:240
+	-> Revamp / Simplify UI
+	-> Home page should only have buttons for "Read Codes" and "Live Data" (Evan's use case)
+	-> Maybe reuse original APM live data page?
 
 * Rewrite/port main APM OBD-II library as a static (not a task) library
-	-> See around web.cpp:290
-	-> Library will store the PIDs being monitored
-	-> Maybe a function that takes a struct and places the PID and values into it
-	-> Also maybe optimize PID support polling, kinda ugly how main APM does it
+	-> Evan is working on this, right now there should be functions to poll
+	   for supported PIDs but they are untested in an actual vehicle.
 	
-* Maybe use the "obd_ws" websocket bidirectionally
-	-> To send OBD-II reading to the client
-	-> To change the values being watched by the client
-	-> around web.cpp:177
+	-> Evan's idea is to have a function "obd_update()" which the UI task can
+	   call whenever to get updated sensor values
+
+	-> Undecided as to how the new lib will handle monitoring PIDs
+		
+		-> Will "obd_update()" return the new values or just update a shared variable
+		
+* Right now, there is code for the Web Server task, it's just disabled while I test
+  the OBD-II library. I'm still tweaking the UI, just only testing locally.
