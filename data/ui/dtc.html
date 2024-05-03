@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <title>JavaScript Testing</title>
+
+        <style>
+
+            body, html {
+                height: 100%;
+                margin: 0; 
+                font-family: 'Helvetica', sans-serif; 
+                background-color: #262626;
+                display: flex;
+                flex-direction: column; 
+            }
+            
+            h1 {
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-top: 7%;
+                font-size: 40px;
+            }
+            
+            .navbar {
+              display: flex;
+              justify-content: flex-end;
+              background-color: #333;
+              padding: 10px 0;
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              z-index: 1000;
+            }
+            
+            .navbar a {
+              color: white;
+              text-align: center;
+              padding: 14px 16px;
+              text-decoration: none;
+              font-size: 17px;
+              margin-left: 10px; 
+            }
+
+            #out_list {
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-size: 20px;
+            }
+
+            button {
+                background-color: #4C4C4C;
+                border: none;
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 30px;
+                margin-top: 30px;
+                margin-left: 30%;
+                margin-right: 30%;
+                cursor: pointer;
+                border-radius: 10px;
+                box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+                flex: 0 0 10%; 
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div class="navbar">
+            <a href="index.html">HOME</a> 
+        </div>
+
+        <h1>Diagnostic Trouble Codes</h1>
+
+        <div id="out_list">
+        </div>
+        
+        <button onclick="ws_request()">Read Codes</button>
+
+    </body>
+
+    <script>
+
+        // Websocket stuff
+        var gateway = `ws://${window.location.hostname}/dtc-ws`;
+        var websocket;
+
+        // List to append DTCs to
+        var dtc_display =  document.getElementById("out_list");
+
+        window.addEventListener('load', onload);
+
+        function onload(event) {
+            initWebSocket();
+        }
+
+        function initWebSocket() {
+            console.log('Trying to open a WebSocket connection…');
+            websocket = new WebSocket(gateway);
+            websocket.onopen = onOpen;
+            websocket.onclose = onClose;
+            websocket.onmessage = onMessage;
+        }
+
+        function onOpen(event) {
+            console.log('WebSocket Connection opened');
+        }
+
+        function onClose(event) {
+            console.log('Connection closed');
+            setTimeout(initWebSocket, 2000);
+        }
+
+        function testData() {
+            var test_data = "{\"codes\": [\"P0000\",\"P0001\",\"P0002\"]}";
+
+            // A message containing DTCs should have only one entry
+            // That one entry should be an array of any DTCs
+            var dtc_obj = JSON.parse(test_data);    // Create an object from the JSON
+            var key = Object.keys(dtc_obj)[0];      // There should only be one key, so get it
+            var dtc_list = dtc_obj[key];            // Get the list of strings
+
+            // Loop through the list of DTCs
+            for(var i = 0; i < dtc_list.length; i++) {
+                
+                // Log each DTC
+                console.log(dtc_list[i]);
+
+                // Create a list entry and append to the list of DTCs being displayed
+                var dtc_entry = document.createElement("p");
+                dtc_entry.appendChild(document.createTextNode(dtc_list[i]));
+                dtc_display.appendChild(dtc_entry);
+            }
+        }
+
+        function ws_request() {
+            console.log("WS Request Button");
+
+            document.getElementById("out_list").innerHTML = "";
+            var loading_text = document.createElement("p");
+            loading_text.appendChild(document.createTextNode("Communicating with the vehicle..."));
+            dtc_display.appendChild(loading_text);
+
+            websocket.send("getDTC");
+        }
+
+        function onMessage(event) {
+
+            // Log the raw data
+            console.log(event.data);
+
+            document.getElementById("out_list").innerHTML = "";
+            
+            // A message containing DTCs should have only one entry
+            // That one entry should be an array of any DTCs
+            var dtc_obj = JSON.parse(event.data);    // Create an object from the JSON
+            var key = Object.keys(dtc_obj)[0];      // There should only be one key, so get it
+            var dtc_list = dtc_obj[key];            // Get the list of strings
+
+            // Loop through the list of DTCs
+            for(var i = 0; i < dtc_list.length; i++) {
+                
+                // Log each DTC
+                console.log(dtc_list[i]);
+
+                // Create a list entry and append to the list of DTCs being displayed
+                var dtc_entry = document.createElement("p");
+                dtc_entry.appendChild(document.createTextNode(dtc_list[i]));
+                dtc_display.appendChild(dtc_entry);
+            }
+        }
+
+    </script>
+
+</html> 

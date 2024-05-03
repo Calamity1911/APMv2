@@ -1,0 +1,59 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page - Automotive Performance Monitor</title>
+    
+    <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Helvetica', sans-serif;
+      background-color: #262626;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-header {
+      color: white;
+      background-color: #333;
+      padding: 20px;
+      text-align: center; 
+      font-size: 36px; 
+      font-weight: bold;
+      border-bottom: 5px solid #E74C3C;
+      margin-bottom: 20px; 
+      padding-top: 60px;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    </style>
+
+  </head>
+
+  <body>
+
+    <div class="main-header">
+      Automotive Performance Monitor
+    </div>
+
+    <div class="main-content">
+      
+      <a href="dtc.html">
+        <button>Read Codes</button>
+      </a>
+
+      <a href="obd-data.html">
+        <button>Live Data</button>
+      </a>
+      
+    </div>
+
+  </body>
+</html>

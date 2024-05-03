@@ -1,0 +1,100 @@
+P0700: Transmission control system (mil request)
+P0701: Transmission control system range/performance
+P0702: Transmission control system electrical
+P0703: Brake switch "b" circuit
+P0704: Clutch switch input circuit
+P0705: Transmission range sensor "a" circuit (PRNDL input)
+P0706: Transmission range sensor "a" circuit range/performance
+P0707: Transmission range sensor "a" circuit low
+P0708: Transmission range sensor "a" circuit high
+P0709: Transmission range sensor "a" circuit intermittent
+P070A: Transmission fluid level sensor circuit
+P070B: Transmission fluid level sensor circuit range/performance
+P070C: Transmission fluid level sensor circuit low
+P070D: Transmission fluid level sensor circuit high
+P070E: Transmission fluid level sensor circuit intermittent/erratic
+P070F: Transmission fluid level too low
+P0710: Transmission fluid temperature sensor "a" circuit
+P0711: Transmission fluid temperature sensor "a" circuit
+P0712: Transmission fluid temperature sensor "a" circuit low
+P0713: Transmission fluid temperature sensor "a" circuit high
+P0714: Transmission fluid temperature sensor "a" circuit intermittent
+P0715: Input/turbine speed sensor "a" circuit
+P0716: Input/turbine speed sensor "a" circuit range/performance
+P0717: Input/turbine speed sensor "a" circuit no signal
+P0718: Input/turbine speed sensor "a" circuit intermittent
+P0719: Brake switch "b" circuit low
+P071A: Transmission mode switch "a" circuit
+P071B: Transmission mode switch "a" circuit low
+P071C: Transmission mode switch "a" circuit high
+P071D: Transmission mode switch "b" circuit
+P071E: Transmission mode switch "b" circuit low
+P071F: Transmission mode switch "b" circuit high
+P0720: Output speed sensor circuit
+P0721: Output speed sensor circuit range/performance
+P0722: Output speed sensor circuit no signal
+P0723: Output speed sensor circuit intermittent
+P0724: Brake switch "b" circuit high
+P0725: Engine speed input circuit
+P0726: Engine speed input circuit range/performance
+P0727: Engine speed input circuit no signal
+P0728: Engine speed input circuit intermittent
+P0729: Gear 6 incorrect ratio
+P072A: Stuck in neutral
+P072B: Stuck in reverse
+P072C: Stuck in gear 1
+P072D: Stuck in gear 2
+P072E: Stuck in gear 3
+P072F: Stuck in gear 4
+P0730: Incorrect gear ratio
+P0731: Gear 1 incorrect ratio
+P0732: Gear 2 incorrect ratio
+P0733: Gear 3 incorrect ratio
+P0734: Gear 4 incorrect ratio
+P0735: Gear 5 incorrect ratio
+P0736: Reverse incorrect ratio
+P0737: Tcm engine speed output circuit
+P0738: Tcm engine speed output circuit low
+P0739: Tcm engine speed output circuit high
+P073A: Stuck in gear 5
+P073B: Stuck in gear 6
+P073C: Stuck in gear 7
+P073D: Unable to engage neutral
+P073E: Unable to engage reverse
+P073F: Unable to engage gear 1
+P0740: Torque converter clutch circuit/open
+P0741: Torque converter clutch circuit performance/stuck off
+P0742: Torque converter clutch circuit stuck on
+P0743: Torque converter clutch circuit electrical
+P0744: Torque converter clutch circuit intermittent
+P0745: Pressure control solenoid "a"
+P0746: Pressure control solenoid "a" performance/stuck off
+P0747: Pressure control solenoid "a" stuck on
+P0748: Pressure control solenoid "a" electrical
+P0749: Pressure control solenoid "a" intermittent
+P074A: Unable to engage gear 2
+P074B: Unable to engage gear 3
+P074C: Unable to engage gear 4
+P074D: Unable to engage gear 5
+P074E: Unable to engage gear 6
+P074F: Unable to engage gear 7
+P0750: Shift solenoid "a"
+P0751: Shift solenoid "a" performance/stuck off
+P0752: Shift solenoid "a" stuck on
+P0753: Shift solenoid "a" electrical
+P0754: Shift solenoid "a" intermittent
+P0755: Shift solenoid "b"
+P0756: Shift solenoid "b" performance/stuck off
+P0757: Shift solenoid "b" stuck on
+P0758: Shift solenoid "b" electrical
+P0759: Shift solenoid "b" intermittent
+P075A: Shift solenoid "g"
+P075B: Shift solenoid "g" performance/stuck off
+P075C: Shift solenoid "g" stuck on
+P075D: Shift solenoid "g" electrical
+P075E: Shift solenoid "g" intermittent
+P075F: Transmission fluid level too high
+P0760: Shift solenoid "c"
+P0761: Shift solenoid "c" performance/stuck off
+P0762: Shift solenoid "c" stuck on
+P0763: Shift solenoid "c" electrical

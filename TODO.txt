@@ -1,0 +1,14 @@
+TODO's 5/1/2024
+
+* See comments in "init_webserver()", around web.cpp:240
+
+* Rewrite/port main APM OBD-II library as a static (not a task) library
+	-> See around web.cpp:290
+	-> Library will store the PIDs being monitored
+	-> Maybe a function that takes a struct and places the PID and values into it
+	-> Also maybe optimize PID support polling, kinda ugly how main APM does it
+	
+* Maybe use the "obd_ws" websocket bidirectionally
+	-> To send OBD-II reading to the client
+	-> To change the values being watched by the client
+	-> around web.cpp:177
