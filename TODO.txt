@@ -18,3 +18,7 @@ TODO's 5/3/2024
 		
 * Right now, there is code for the Web Server task, it's just disabled while I test
   the OBD-II library. I'm still tweaking the UI, just only testing locally.
+  
+* Also note that the ESP32-S3 dev kits from senior design were actually N8R2 / P2N8
+  meaning they only have 8MB Flash and 2MB PSRAM when they were advertised as N16R8.
+  Not really a problem though
