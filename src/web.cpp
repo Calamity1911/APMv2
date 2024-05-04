@@ -28,6 +28,7 @@ JsonDocument json_document;
 #define JSON_STR_LEN 1024
 char json_string[JSON_STR_LEN] = {0};
 
+// Be careful using this function, it doesn't have length checks for now
 void remove_front(uint8_t* data, uint32_t* len) {
 
   // Create a temporary buffer whose size is the same as the input
@@ -47,19 +48,20 @@ void remove_front(uint8_t* data, uint32_t* len) {
 
 }
 
+// Initializes DNS server. Unsure if this is needed for the captive portal, HTTP server, or both.
 void init_dns() {
     dns_server.setErrorReplyCode(DNSReplyCode::NoError);
 	dns_server.setTTL(300);
     dns_server.start(53, "*", WiFi.softAPIP());
 }
 
+// Initializes the actual wireless interface
 void init_softAP() {
 
 	// Generate SSID from the chip's MAC address
 	uint8_t mac_addr[6] = {0};
 	esp_read_mac(mac_addr, ESP_MAC_WIFI_SOFTAP);
 	sprintf(ssid, "APM_%02X%02X%02X", mac_addr[3], mac_addr[4], mac_addr[5]);
-	Serial.printf("[WEB] Generated SSID %s\n", ssid);
 
 	// Create the soft AP
 	if(!WiFi.softAP(ssid, password)) {
@@ -81,6 +83,7 @@ void init_softAP() {
 
 }
 
+// Used to check for any existing DTCs and send a list of any using WebSockets and JSON
 void ws_send_dtcs() {
 
     json_document.clear();
@@ -166,17 +169,25 @@ void ws_send_dtcs() {
 
 }
 
+// Handles parsing inbound WebSocket data
 void websocket_funct(void *arg, uint8_t *data, size_t len) {
 	
     AwsFrameInfo *info = (AwsFrameInfo*)arg;
   	
     if(info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-    	data[len] = 0;
+    	
+        // Insert a null terminator to ensure interop with string libraries
+        data[len] = 0;
     	char* message = (char*)data;
 
+        // If the WebSocket request data was the string "getDTC", run the function to read and send DTCs
         if(strcmp(message, "getDTC") == 0) {
+
+            // This request should only come from the DTC websocket, so send responses there
             Serial.printf("[WEB] Got a websocket request for DTCs\n");
             ws_send_dtcs();
+
+        // If it wasn't any of the above requests, log it to serial
         } else {
             Serial.printf("[WEB] Unknown websocket request %s\n", message);
         }
@@ -184,6 +195,7 @@ void websocket_funct(void *arg, uint8_t *data, size_t len) {
   	}
 }
 
+// Event callback for WebSockets
 void on_ws_event(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len) {
 	switch (type) {
     	
@@ -197,34 +209,40 @@ void on_ws_event(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventT
       		Serial.printf("[WEB] WebSocket client disconnected\n");
       		break;
 
-        // Client sent data
+        // Client sent data -> Parse the sent data
     	case WS_EVT_DATA:
       		websocket_funct(arg, data, len);
       		break;
 
-        // Ignore these two
+        // Ignore these two?
     	case WS_EVT_PONG:
     	case WS_EVT_ERROR:
       		break;
   	}
 }
 
+// Initializes the HTTP webserver with a bunch of predefined responses
+// Also initializes the websocket objects
 void init_webserver() {
 
+    // Register the same on-event function
+    // We only care about the request data for this part
     dtc_ws.onEvent(on_ws_event);
     obd_ws.onEvent(on_ws_event);
 
-    // Windows 11 workaround
+    // Windows 11 captive portal workaround
     web_server.on("/connecttest.txt", [](AsyncWebServerRequest *request) { request->redirect("http://logout.net"); });
     web_server.on("/wpad.dat", [](AsyncWebServerRequest *request) { request->send(404); });	
 
     // Background responses: Probably not all are Required, but some are. Others might speed things up?
 	// A Tier (commonly used by modern systems)
+    // This was from the example code provided by the captive portal stuff. Looks like it just sends redirects
+    // to the UI IP Address on specific requests
 	web_server.on("/generate_204", [](AsyncWebServerRequest *request) { request->redirect(redirect_addr); });		    // android captive portal redirect
 	web_server.on("/redirect", [](AsyncWebServerRequest *request) { request->redirect(redirect_addr); });			    // microsoft redirect
 	web_server.on("/hotspot-detect.html", [](AsyncWebServerRequest *request) { request->redirect(redirect_addr); });    // apple call home
 	web_server.on("/canonical.html", [](AsyncWebServerRequest *request) { request->redirect(redirect_addr); });	        // firefox captive portal call home
-	web_server.on("/success.txt", [](AsyncWebServerRequest *request) { request->send(200); });					    // firefox captive portal call home
+	web_server.on("/success.txt", [](AsyncWebServerRequest *request) { request->send(200); });					        // firefox captive portal call home
 	web_server.on("/ncsi.txt", [](AsyncWebServerRequest *request) { request->redirect(redirect_addr); });			    // windows call home
 
     // Don't return an icon
@@ -236,23 +254,19 @@ void init_webserver() {
     // Enable the OBD data websocket in the server
     web_server.addHandler(&obd_ws);
 
-    // Eventually add an index page with three buttons:
-    //      Read DTC
-    //      Clear DTC
-    //      Live Data
-    // Reuse main APM live data page?
-
     // Initial connection, serve index.html
 	web_server.on("/", HTTP_ANY, [](AsyncWebServerRequest *request) {
 		request->send(SPIFFS, "/ui/index.html", "text/html");
 		Serial.println("[WEB] Served Index");
 	});
 
+    // Explicit request for the index page
     web_server.on("/index.html", HTTP_ANY, [](AsyncWebServerRequest *request) {
 		request->send(SPIFFS, "/ui/index.html", "text/html");
 		Serial.println("[WEB] Served Index");
 	});
 
+    // Explicit request for the DTC page
     web_server.on("/dtc.html", HTTP_ANY, [](AsyncWebServerRequest *request) {
 		request->send(SPIFFS, "/ui/dtc.html", "text/html");
 		Serial.println("[WEB] Served DTC page");
@@ -268,11 +282,7 @@ void init_webserver() {
 
 void ui_setup() {
 
-    void tp_lib_init();
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-    void mil_init();
-    vTaskDelay(pdMS_TO_TICKS(100));
+    // CAN bus related Libs should be initialized in main before this task is created
 
     init_softAP();
     vTaskDelay(pdMS_TO_TICKS(100));
@@ -291,19 +301,20 @@ void web_main() {
     
     ui_setup();
 
+    // Counts how many times the main loop has run
     uint8_t task_ticks = 0;
 
     while(1) {
 
+        // 9 ticks * 30ms a tick = every 270ms (~4Hz)
         // Don't forget to count the 0th tick!
-        if(task_ticks >= 239) {
+        if(task_ticks >= 8) {
 
             // Send OBD2 live data
-            // I might try a "static" OBD-II library (not a task like main APM)
+            // Should be a static (not a task) library
+            // Unsure if the library will store the PIDs being watched or this UI task will
 
-            // In the APM main version, to prevent overflowing a websocket buffer,
-            // we just send a message, wait 10ms, and clean the buffers.
-
+            // Reset count
             task_ticks = 0;
         }
 
