@@ -3,7 +3,9 @@
 <html>
 
     <head>
-        <title>JavaScript Testing</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>APMv2 - Codes</title>
 
         <style>
 
@@ -25,15 +27,16 @@
             .navbar {
                 color: white;
                 background-color: #333;
-                padding: 20px;
                 text-align: center; 
                 font-size: 36px; 
                 font-weight: bold;
                 border-bottom: 5px solid #E74C3C;
-                margin-bottom: 20px; 
-                padding-top: 60px;
                 display: flex;
                 flex-direction: row;
+                width: 100%;
+                padding-top: 30px;
+                padding-bottom: 30px;
+                margin-bottom: 30px;
             }
 
             #out_list {
@@ -45,7 +48,7 @@
                 margin-bottom: 75px;
             }
 
-            .read_btn {
+            .btn {
                 background-color: #4C4C4C;
                 border: none;
                 color: white;
@@ -54,9 +57,30 @@
                 font-size: 30px;
                 border-radius: 10px;
                 box-shadow: 0 2px 4px 0 rgba(0,0,0,0.3);
-                margin-bottom: 10%;
+                margin-bottom: 20px;
                 width: 300px;
                 height: 75px;
+            }
+
+            .home_btn {
+                align-self: flex-end;
+                margin-left: auto;
+                padding-bottom: 10px;
+                padding-right: 10px;
+            }
+
+            .home_btn button {
+                background-color: #4C4C4C;
+                border: none;
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                font-size: 20px;
+                width: 100px;
+                height: 40px;
+                border-radius: 1px;
+                box-shadow: 0 2px 4px 0 rgba(0,0,0,0.3);
+                border-radius: 10px;
             }
 
         </style>
@@ -64,18 +88,23 @@
 
     <body>
 
-        <div class="navbar">
-            Automotive Performance Monitor v2
-            <a href="index.html">
-                <button class="home_btn">Home</button>
-            </a>
-        </div>
-
         <div class="main_content">
+            
+            <div class="navbar">
+                
+                &nbsp;&nbsp;Automotive Performance Monitor v2
+                <a href="index.html" class="home_btn">
+                    <button>Home</button>
+                </a>
+                
+            </div>
+
             <div id="out_list">
                 Press the button below to read any potential codes
             </div>
-            <button onclick="ws_request()" class="read_btn">Read Codes</button>
+
+            <button onclick="ws_request()" class="btn">Read Codes</button>
+            <button onclick="ws_clear()" class="btn">Clear Codes</button>
         </div>
         
     </body>
@@ -143,6 +172,10 @@
             dtc_display.appendChild(loading_text);
 
             websocket.send("getDTC");
+        }
+
+        function ws_clear() {
+            alert("Not yet implemented");
         }
 
         function onMessage(event) {

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>APMv2 - Live Data</title>
+
+        <style>
+            body, html {
+                height: 100%;
+                margin: 0;
+                font-family: 'Helvetica', sans-serif;
+                background-color: #262626;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .main_content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .navbar {
+                color: white;
+                background-color: #333;
+                text-align: center; 
+                font-size: 36px; 
+                font-weight: bold;
+                border-bottom: 5px solid #E74C3C;
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                padding-top: 30px;
+                padding-bottom: 30px;
+                margin-bottom: 30px;
+            }
+
+            .home_btn {
+                align-self: flex-end;
+                margin-left: auto;
+                padding-bottom: 10px;
+                padding-right: 10px;
+            }
+
+            .home_btn button {
+                background-color: #4C4C4C;
+                border: none;
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                font-size: 20px;
+                width: 100px;
+                height: 40px;
+                border-radius: 1px;
+                box-shadow: 0 2px 4px 0 rgba(0,0,0,0.3);
+                border-radius: 10px;
+            }
+
+            .output {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                text-align: center;
+                color: white;
+                font-size: 20px;
+                width: 50%;
+                border: 2px solid #E74C3C;
+            }
+
+            form {
+                display: flex;
+                flex-direction: column;
+                margin-top: 75px;
+                width: 50%;
+                gap: 20px;
+            }
+
+            select {
+                padding: 10px 15px;
+                display: flex;
+                flex-direction: column;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                background-color: #4C4C4C;
+                box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+                width: 50%;
+                font-size: 20px;
+            }
+
+            .submit {
+                background-color: #4C4C4C;
+                border: none;
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 25px;
+                margin-top: 5px;
+                cursor: pointer;
+                border-radius: 15px;
+                box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+                flex: 0 0 10%; 
+                width: 50%;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class="main_content">
+
+            <div class="navbar">
+              
+                &nbsp;&nbsp;Automotive Performance Monitor v2
+                <a href="index.html" class="home_btn">
+                  <button>Home</button>
+                </a>
+                    
+            </div>
+
+            <div class="output">
+                <span id="pid_a">[sensor pending]</span>
+                <span id="out_a">[value pending]</span>
+            </div>
+
+            <div class="output">
+                <span id="pid_b">[sensor pending]</span>
+                <span id="out_b">[value pending]</span>
+            </div>
+            
+            <div class="output">
+                <span id="pid_c">[sensor pending]</span>
+                <span id="out_c">[value pending]</span>
+            </div>
+
+            <!-- Figure out a way to use websockets to get the supported sensors -->
+
+            <select id="in_a" name="in_a">
+                <option value="255">Waiting on vehicle</option>
+            </select>
+
+            <select id="in_b" name="in_b">
+                <option value="255">Waiting on vehicle</option>
+            </select>
+
+            <select id="in_c" name="in_c">
+                <option value="255">Waiting on vehicle</option>
+            </select>
+
+            <button onclick="change_monitor()" class="submit">Update</button>
+
+        </div>
+
+        <script>
+            function change_monitor() {
+                alert("Not yet implemented");
+            }
+        </script>
+
+    </body>
+
+</html>

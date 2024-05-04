@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page - Automotive Performance Monitor</title>
+    <title>APMv2 - Home</title>
     
     <style>
     body, html {
@@ -16,25 +16,54 @@
       flex-direction: column;
     }
 
-    .navbar {
-      color: white;
-      background-color: #333;
-      padding: 20px;
-      text-align: center; 
-      font-size: 36px; 
-      font-weight: bold;
-      border-bottom: 5px solid #E74C3C;
-      margin-bottom: 20px; 
-      padding-top: 60px;
-    }
-
-    .main-content {
+    .main_content {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+            
+    .navbar {
+      color: white;
+      background-color: #333;
+      text-align: center; 
+      font-size: 36px; 
+      font-weight: bold;
+      border-bottom: 5px solid #E74C3C;
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      padding-top: 30px;
+      padding-bottom: 30px;
+      margin-bottom: 30px;
+    }
 
-    button {
+    .home_btn {
+      align-self: flex-end;
+      margin-left: auto;
+      padding-bottom: 10px;
+      padding-right: 10px;
+    }
+
+    .home_btn button {
+      background-color: #4C4C4C;
+      border: none;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      font-size: 20px;
+      width: 100px;
+      height: 40px;
+      border-radius: 1px;
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,0.3);
+      border-radius: 10px;
+    }
+
+    .subpages {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .subpages button {
       background-color: #4C4C4C;
       border: none;
       color: white;
@@ -44,7 +73,7 @@
       border-radius: 10px;
       box-shadow: 0 2px 4px 0 rgba(0,0,0,0.3);
       margin-bottom: 10%;
-      width: 300px;
+      width: 325px;
       height: 75px;
     }
     </style>
@@ -53,21 +82,35 @@
 
   <body>
 
-    <div class="navbar">
-      Automotive Performance Monitor v2
-    </div>
+    <body>
 
-    <div class="main-content">
-      
-      <a href="dtc.html">
-        <button>Read Codes</button>
-      </a>
+      <div class="main_content">
+          
+        <div class="navbar">
+              
+          &nbsp;&nbsp;Automotive Performance Monitor v2
+          <a href="index.html" class="home_btn">
+            <button>Home</button>
+          </a>
+              
+        </div>
 
-      <a href="obd-data.html">
-        <button>Live Data</button>
-      </a>
+        <div class="subpages">
+
+          <a href="dtc.html">
+            <button>Read & Clear Codes</button>
+          </a>
+
+          <a href="obd-data.html">
+            <button>Live Data</button>
+          </a>
+
+        </div>
+
+      </div>
       
-    </div>
+  </body>
+
 
   </body>
 </html>
