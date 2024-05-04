@@ -10,6 +10,7 @@ uint8_t POLL_PIDS[3];
 // Only supporting PIDs 0x00 thru 0x7F = 128 PIDs
 uint8_t SUPPORTED_PIDS[129];
 
+// Removes 0th element and shifts remaining data over
 void remove_front(uint8_t* data, uint32_t* len) {
 
     // Don't shift, just set values
@@ -36,6 +37,7 @@ void remove_front(uint8_t* data, uint32_t* len) {
 
 }
 
+// Reverses bit order of a provided byte by using a lookup table
 uint8_t reverse_byte(uint8_t x) {
     static const uint8_t table[] = {
         0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
@@ -81,6 +83,7 @@ bool obd_errchk(uint8_t* data) {
     return (data[0] & 0xF0 == 0x40);
 }
 
+// Uses PID 0x00 to poll the vehicle for supported PIDs in the range [0x01, 0x20] inclusive
 esp_err_t poll_supported_00() {
 
     // Always assume PID 0x00 is supported, as this is used to poll
@@ -153,6 +156,8 @@ esp_err_t poll_supported_00() {
     return ESP_OK;
 }
 
+// Uses PID 0x20 to poll the vehicle for supported PIDs in the range [0x21, 0x40] inclusive
+// poll_supported_00() should be executed first, as the support for PID 0x20 itself is determined there
 esp_err_t poll_supported_20() {
 
     // Check if 0x20 is supported
@@ -226,6 +231,8 @@ esp_err_t poll_supported_20() {
     return ESP_OK;
 }
 
+// Uses PID 0x40 to poll the vehicle for supported PIDs in the range [0x41, 0x60] inclusive
+// poll_supported_20() should be executed first, as the support for PID 0x40 itself is determined there
 esp_err_t poll_supported_40() {
 
     // Check if 0x40 is supported
@@ -299,6 +306,8 @@ esp_err_t poll_supported_40() {
     return ESP_OK;
 }
 
+// Uses PID 0x60 to poll the vehicle for supported PIDs in the range [0x61, 0x80] inclusive
+// poll_supported_40() should be executed first, as the support for PID 0x60 itself is determined there
 esp_err_t poll_supported_60() {
 
     // Check if 0x60 is supported
@@ -372,6 +381,9 @@ esp_err_t poll_supported_60() {
     return ESP_OK;
 }
 
+// Uses helper functions to poll the connected vehicle for what PIDs are supported. I only really care about
+// 0x00 thru 0x7F as above is the newer WWH-OBD standard
+// Also prints the availability of PIDs to the serial port initialized in main
 esp_err_t poll_all_pids() {
 
     // Assume PID 0x00 is always available, this will update
@@ -444,6 +456,7 @@ esp_err_t poll_all_pids() {
         return result;
     }
 
+    // If we make it this far, print all supported PIDs
     Serial.printf("[OBD] Supported PIDs:\n");
     for(int i = 0; i < 128; i++) {
         Serial.printf("\tPID 0x%02X: ", i);
@@ -459,7 +472,9 @@ esp_err_t poll_all_pids() {
 }
 
 // Request a PID value
-esp_err_t obd_get_pid(uint8_t PID, uint8_t rx_data, uint32_t* rx_len) {
+// Dumps raw OBD/ISO-TP data into the provided output buffer and delegates decoding said data to who/whatever calls this function.
+// Also assumes that no data needs to be sent other than the PID itself (and the mode, which should always be 0x01 for reading PIDs)
+esp_err_t obd_get_pid(uint8_t PID, uint8_t* rx_data, uint32_t* rx_len) {
 
 }
 

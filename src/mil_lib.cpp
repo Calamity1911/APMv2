@@ -5,57 +5,74 @@
 
 // #define MIL_VERBOSE
 
-void mil_init() {
-
+// Checks for the presence of the dictionaries for the P0XXX codes
+// Halts execution on a fail, not allowing the UI to boot
+void check_dict_p() {
+    
+    // Check for the dictionary containing DTCs in the range P00XX
     if(!SPIFFS.exists("/dtc/p_00.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P00XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P01XX
     if(!SPIFFS.exists("/dtc/p_01.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P01XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P02XX
     if(!SPIFFS.exists("/dtc/p_02.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P02XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P03XX
     if(!SPIFFS.exists("/dtc/p_03.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P03XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P04XX
     if(!SPIFFS.exists("/dtc/p_04.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P04XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P05XX
     if(!SPIFFS.exists("/dtc/p_05.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P05XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P06XX
     if(!SPIFFS.exists("/dtc/p_06.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P06XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P07XX
     if(!SPIFFS.exists("/dtc/p_07.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P07XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P08XX
     if(!SPIFFS.exists("/dtc/p_08.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P08XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    // Check for the dictionary containing DTCs in the range P09XX
     if(!SPIFFS.exists("/dtc/p_09.txt")) {
         Serial.printf("[MIL] DTC/MIL library for PIDs P09XX do not exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
+}
+
+void mil_init() {
+
+    check_dict_p();
 
     Serial.printf("[MIL] Library checks passed!\n");
 
@@ -160,14 +177,18 @@ void read_dictionary_p(const char* in, char* out) {
 
 }
 
+// Converts a DTC being represented as a uint16 to a DTC string, ex P0123
 void decode_dtc(uint16_t plain_dtc, char str_dtc[6]) {
 
+    // Characters of the DTC string
     char letter = 0x00;
     char thousands = 0x00;
     char hundreds = 0x00;
     char tens = 0x00;
     char ones = 0x00;
 
+    // Determine the letter at the beginning of the DTC
+    // Only 4 legal cases b/c the mask is 2 bits, so a switch statement is fine to write
     uint8_t mask = (plain_dtc & 0xC000) >> 14;
     switch(mask) {
         case 0x00:
@@ -191,6 +212,8 @@ void decode_dtc(uint16_t plain_dtc, char str_dtc[6]) {
             letter = '~';
     }
 
+    // Determine the thousands digit of the DTC. Any number besides 0 is mfgr specific
+    // Only 4 legal cases b/c the mask is 2 bits, so a switch statement is fine to write
     mask = (plain_dtc & 0x3000) >> 12;
     switch(mask) {
         case 0x00:
@@ -215,6 +238,8 @@ void decode_dtc(uint16_t plain_dtc, char str_dtc[6]) {
     }
 
     // I feel like twhat follows is illegal
+    // This is Evan's jank way to convert from BCD to Hex characters
+    // The mask is actually just a hex value and usually is only decimal
     mask = (plain_dtc & 0xF00) >> 8;
     if(mask < 10) {
         hundreds = '0' + mask;
@@ -276,6 +301,7 @@ bool mil_description(uint16_t plain_dtc, char* out) {
         return true;
     }
 
+    // Read from the matching dictionary to see if we have a description
     switch(origin) {
         case 'P':
             read_dictionary_p(str_dtc, out);
@@ -289,29 +315,36 @@ bool mil_description(uint16_t plain_dtc, char* out) {
     return true;
 }
 
+// Condenses pairs of bytes in a provided list into 16-bit DTCs
 esp_err_t bytes_to_dtcs(const uint8_t* in, uint16_t* out, uint32_t in_len, uint32_t* out_len) {
 
+    // No DTCs
     if(in_len == 0) {
         *out_len = 0;
         return ESP_OK;
     }
 
+    // Not a multiple of 2 bytes, so not a whole number of DTCs
     if(in_len % 2 != 0) {
         Serial.printf("[MIL] Provided input data isn't an even length, and DTCs are represented as two bytes\n");
         return ESP_FAIL;
     }
 
+    // Check if all DTCs will fit in output buffer
     uint32_t dtc_count = in_len / 2;
     if(dtc_count > *out_len) {
         Serial.printf("[MIL] DTC output buffer is too small for provided data. %d DTCs in the input, output is %d long.\n", dtc_count, *out_len);
         return ESP_FAIL;
     }
 
+    // Do the actual condensing
     for(int i = 0; i < in_len; i+=2) {
         out[i/2] = (in[i+0] << 8) | in[i+1];
     }
 
+    // Update output length
     *out_len = dtc_count;
+    
     return ESP_OK;
 
 }
