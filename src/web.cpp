@@ -180,17 +180,25 @@ void websocket_funct(void *arg, uint8_t *data, size_t len) {
         data[len] = 0;
     	char* message = (char*)data;
 
-        // If the WebSocket request data was the string "getDTC", run the function to read and send DTCs
-        if(strcmp(message, "getDTC") == 0) {
+        // Any inbound message should be a JSON message with the key "command"
+        json_document.clear();
+        DeserializationError parse_error = deserializeJson(json_document, message);
 
-            // This request should only come from the DTC websocket, so send responses there
-            Serial.printf("[WEB] Got a websocket request for DTCs\n");
-            ws_send_dtcs();
-
-        // If it wasn't any of the above requests, log it to serial
-        } else {
-            Serial.printf("[WEB] Unknown websocket request %s\n", message);
+        if(parse_error) {
+            Serial.printf("[WEB] Failed to parse json message %s\n", message);
+            Serial.printf("[WEB] Parse error %s", parse_error.c_str());
+            return;
         }
+
+        if(!json_document.containsKey("cmd")) {
+            Serial.printf("[WEB] JSON Document does not contain a command\n");
+            Serial.printf("[WEB] Provided JSON: %s\n", message);
+            return;
+        }
+
+        const char* command = json_document["cmd"];
+
+        Serial.printf("[WEB] Received command \"%s\"\n", command);
 
   	}
 }

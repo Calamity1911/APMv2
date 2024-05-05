@@ -171,11 +171,12 @@
             loading_text.appendChild(document.createTextNode("Communicating with the vehicle..."));
             dtc_display.appendChild(loading_text);
 
-            websocket.send("getDTC");
+            websocket.send("{\"cmd\": \"dtc_list\"}");
         }
 
         function ws_clear() {
-            alert("Not yet implemented");
+            console.log("WS Clear Button");
+            websocket.send("{\"cmd\": \"dtc_clear\"}")
         }
 
         function onMessage(event) {
