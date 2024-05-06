@@ -1,23 +1,14 @@
-TODO's 5/3/2024
-
-* See comments in "init_webserver()", around web.cpp:240
-	-> Revamp / Simplify UI
-	-> Home page should only have buttons for "Read Codes" and "Live Data" (Evan's use case)
-	-> Maybe reuse original APM live data page?
+TODO's 5/5/2024
 
 * Rewrite/port main APM OBD-II library as a static (not a task) library
-	-> Evan is working on this, right now there should be functions to poll
-	   for supported PIDs but they are untested in an actual vehicle.
-	
-	-> Evan's idea is to have a function "obd_update()" which the UI task can
-	   call whenever to get updated sensor values
+	-> Still working on OBD lib, see obd_get_pid()
+	-> Maybe use a dictionary like the DTCs to store PIDs
+	-> Need to test the PID polling functions
 
-	-> Undecided as to how the new lib will handle monitoring PIDs
-		
-		-> Will "obd_update()" return the new values or just update a shared variable
-		
-* Right now, there is code for the Web Server task, it's just disabled while I test
-  the OBD-II library. I'm still tweaking the UI, just only testing locally.
+* UI appears to be done in terms of layout, but still need to write the
+  javascript to handle the PID/sensor functionality
+	-> See the websocket functions from web.cpp lines 176 to 232
+	   for both the json formatting and expected response stuff
   
 * Also note that the ESP32-S3 dev kits from senior design were actually N8R2 / P2N8
   meaning they only have 8MB Flash and 2MB PSRAM when they were advertised as N16R8.

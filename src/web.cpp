@@ -64,7 +64,8 @@ void init_softAP() {
 
 }
 
-// Used to check for any existing DTCs and send a list of any using WebSockets and JSON
+// Builds a response to a "dtc_list" command from the client and sends it over the websocket
+// Uses the OBD-II library and ISO-TP library to get a list of DTCs and encapsulate it in the expected JSON format
 void ws_send_dtcs() {
 
     json_document.clear();
@@ -151,6 +152,8 @@ void ws_send_dtcs() {
 
 }
 
+// Builds a response to a "dtc_clear" command from the client and sends it over the websocket
+// Uses the OBD-II library to request the clearing of DTCs and encapsulates a response in the expected JSON format
 void ws_clear_dtcs() {
     
     // Clear and prepare json
@@ -168,6 +171,66 @@ void ws_clear_dtcs() {
 
 }
 
+// Builds a response to a "list_pids" command from the client and sends it over the websocket
+// Uses the OBD-II library to get the list of PIDs supported by the attached vehicle, and sends a list in the expected JSON format
+void ws_send_pids() {
+    /* 
+    -> Expected JSON format:
+        {
+            "rsp": "list_pids",
+            "pids": [string list]
+        }
+    */
+}
+
+// Builds a response to a "get_vals" command from the client and sends it over the websocket
+// Uses the OBD-II library to get the PID values being currently monitored and sends a response in the expected JSON format
+void ws_send_vals() {
+
+    /* 
+    -> Expected JSON format:
+        {
+            "rsp": "pid_vals",
+            "pid_a": 255,
+            "pid_b": 255,
+            "pid_c": 255
+        }
+    */
+
+    // Clear document and add response
+    json_document.clear();
+    memset(json_string, 0, JSON_STR_LEN);
+    json_document["rsp"] = "pid_vals";
+
+    // Get the pid vals eventually, for now send 255's
+    json_document["pid_a"] = 255;
+    json_document["pid_b"] = 255;
+    json_document["pid_c"] = 255;
+
+    // Send response
+    if( serializeJson(json_document, json_string, JSON_STR_LEN) > 0 ) {
+        obd_ws.textAll(json_string);
+    }
+
+}
+
+// Changes the locally held variables determining what PID values to monitor
+void ws_change_mon() {
+
+    /* 
+    -> Expected JSON format:
+        {
+            "cmd": "change_mon",
+            "pid_a": 255,
+            "pid_b": 255,
+            "pid_c": 255
+        }
+    -> Should still be stored in the json_document object
+    -> Doesn't send a response
+    */
+
+}
+
 // Handles parsing inbound WebSocket data
 void websocket_funct(void *arg, uint8_t *data, size_t len) {
 	
@@ -179,23 +242,30 @@ void websocket_funct(void *arg, uint8_t *data, size_t len) {
         data[len] = 0;
     	char* message = (char*)data;
 
-        // Any inbound message should be a JSON message with the key "command"
+        // Clear any residual data
         json_document.clear();
+
+        // Attempt to parse message as JSON
         DeserializationError parse_error = deserializeJson(json_document, message);
 
+        // If there was a parsing error, print it and return
         if(parse_error) {
             Serial.printf("[WEB] Failed to parse json message %s\n", message);
             Serial.printf("[WEB] Parse error %s", parse_error.c_str());
             return;
         }
 
+        // Look for the key "cmd" which is required for communication from client to server
         if(!json_document.containsKey("cmd")) {
             Serial.printf("[WEB] JSON Document does not contain a command\n");
             Serial.printf("[WEB] Provided JSON: %s\n", message);
             return;
         }
 
+        // If there is a "cmd" key, it should be a string so extract it
         const char* command = json_document["cmd"];
+
+        /* Below: Do stuff according to extracted command */
 
         if( strcmp(command, "dtc_list") == 0 ) {
             Serial.printf("[WEB] Received request for a list of DTCs\n");
@@ -208,6 +278,20 @@ void websocket_funct(void *arg, uint8_t *data, size_t len) {
             ws_clear_dtcs();
             return;
         }
+
+        if( strcmp(command, "list_pids") == 0 ) {
+            Serial.printf("[WEB] Received request to list supported PIDs\n");
+            ws_send_pids();
+            return;
+        }
+
+        if( strcmp(command, "change_mon") == 0 ) {
+            Serial.printf("[WEB] Received request to change the monitored PIDs\n");
+            ws_change_mon();
+            return;
+        }
+
+        /* At this point, no matching command was found */
 
         Serial.printf("[WEB] Unknown command \"%s\" received\n", command);
 
@@ -329,9 +413,10 @@ void web_main() {
         // Don't forget to count the 0th tick!
         if(task_ticks >= 8) {
 
-            // Send OBD2 live data
-            // Should be a static (not a task) library
-            // Unsure if the library will store the PIDs being watched or this UI task will
+            // Send OBD2 live data, give the client 10ms to read it
+            ws_send_vals();
+            vTaskDelay(pdMS_TO_TICKS(10));
+            obd_ws._cleanBuffers();
 
             // Reset count
             task_ticks = 0;
