@@ -7,6 +7,7 @@
 #include "driver/twai.h"
 
 #include "iso_tp.hpp"
+#include "obd.hpp"
 #include "mil_lib.hpp"
 
 #define MAX_CLIENTS 1
@@ -27,26 +28,6 @@ JsonDocument json_document;
 
 #define JSON_STR_LEN 1024
 char json_string[JSON_STR_LEN] = {0};
-
-// Be careful using this function, it doesn't have length checks for now
-void remove_front(uint8_t* data, uint32_t* len) {
-
-  // Create a temporary buffer whose size is the same as the input
-  uint8_t temp[(*len)] = {0};
-
-  // Copy data starting at the first element into the temp buffer (adjust size to ignore the 0th element)
-  memcpy(temp, &(data[1]), (*len)-1);
-
-  // Clear the original
-  memset(data, 0, *len);
-
-  // Copy in the shifted data
-  memcpy(data, temp, (*len)-1);
-
-  // Decrease the size of the output by one
-  *len -= 1;
-
-}
 
 // Initializes DNS server. Unsure if this is needed for the captive portal, HTTP server, or both.
 void init_dns() {
@@ -88,6 +69,7 @@ void ws_send_dtcs() {
 
     json_document.clear();
     memset(json_string, 0, JSON_STR_LEN);
+    json_document["rsp"] = "dtc_list";
 
     // Create and add an element to the JSON document which is an array
     JsonArray dtc_list = json_document["dtc"].to<JsonArray>();
@@ -169,6 +151,23 @@ void ws_send_dtcs() {
 
 }
 
+void ws_clear_dtcs() {
+    
+    // Clear and prepare json
+    json_document.clear();
+    memset(json_string, 0, JSON_STR_LEN);
+    json_document["rsp"] = "dtc_clear";
+
+    // Not implemented yet
+    json_document["content"] = "For now, this function isn't implemented";
+
+    // Send response
+    if( serializeJson(json_document, json_string, JSON_STR_LEN) > 0 ) {
+        dtc_ws.textAll(json_string);
+    }
+
+}
+
 // Handles parsing inbound WebSocket data
 void websocket_funct(void *arg, uint8_t *data, size_t len) {
 	
@@ -198,7 +197,19 @@ void websocket_funct(void *arg, uint8_t *data, size_t len) {
 
         const char* command = json_document["cmd"];
 
-        Serial.printf("[WEB] Received command \"%s\"\n", command);
+        if( strcmp(command, "dtc_list") == 0 ) {
+            Serial.printf("[WEB] Received request for a list of DTCs\n");
+            ws_send_dtcs();
+            return;
+        }
+
+        if( strcmp(command, "dtc_clear") == 0 ) {
+            Serial.printf("[WEB] Received request to clear DTCs\n");
+            ws_clear_dtcs();
+            return;
+        }
+
+        Serial.printf("[WEB] Unknown command \"%s\" received\n", command);
 
   	}
 }

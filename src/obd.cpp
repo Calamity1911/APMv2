@@ -8,7 +8,7 @@
 uint8_t POLL_PIDS[3];
 
 // Only supporting PIDs 0x00 thru 0x7F = 128 PIDs
-uint8_t SUPPORTED_PIDS[129];
+uint8_t SUPPORTED_PIDS[256];
 
 // Removes 0th element and shifts remaining data over
 void remove_front(uint8_t* data, uint32_t* len) {
@@ -475,6 +475,6 @@ esp_err_t poll_all_pids() {
 // Dumps raw OBD/ISO-TP data into the provided output buffer and delegates decoding said data to who/whatever calls this function.
 // Also assumes that no data needs to be sent other than the PID itself (and the mode, which should always be 0x01 for reading PIDs)
 esp_err_t obd_get_pid(uint8_t PID, uint8_t* rx_data, uint32_t* rx_len) {
-
+    return ESP_OK;
 }
 

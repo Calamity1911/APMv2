@@ -67,11 +67,11 @@ void setup() {
   mil_init();
 
   // Testing this function eventually
-  esp_err_t result = poll_all_pids();
-  Serial.printf("[MAIN] PID Support polling returned 0x%04X %s\n", result, esp_err_to_name(result));
+  // esp_err_t result = poll_all_pids();
+  // Serial.printf("[MAIN] PID Support polling returned 0x%04X %s\n", result, esp_err_to_name(result));
 
   // Disabled temporarily while Evan works on OBD lib
-  // xTaskCreate((TaskFunction_t)web_main, "WEB", 65535, (void*)1, 10, &WEB_TASK);
+  xTaskCreate((TaskFunction_t)web_main, "WEB", 65535, (void*)1, 10, &WEB_TASK);
 
 }
 

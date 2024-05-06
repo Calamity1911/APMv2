@@ -116,7 +116,9 @@
         var websocket;
 
         // List to append DTCs to
-        var dtc_display =  document.getElementById("out_list");
+        var output_display =  document.getElementById("out_list");
+
+        var last_cmd = "";
 
         window.addEventListener('load', onload);
 
@@ -159,7 +161,7 @@
                 // Create a list entry and append to the list of DTCs being displayed
                 var dtc_entry = document.createElement("p");
                 dtc_entry.appendChild(document.createTextNode(dtc_list[i]));
-                dtc_display.appendChild(dtc_entry);
+                output_display.appendChild(dtc_entry);
             }
         }
 
@@ -169,29 +171,25 @@
             document.getElementById("out_list").innerHTML = "";
             var loading_text = document.createElement("p");
             loading_text.appendChild(document.createTextNode("Communicating with the vehicle..."));
-            dtc_display.appendChild(loading_text);
+            output_display.appendChild(loading_text);
 
             websocket.send("{\"cmd\": \"dtc_list\"}");
+            last_cmd = "dtc_list";
         }
 
         function ws_clear() {
             console.log("WS Clear Button");
-            websocket.send("{\"cmd\": \"dtc_clear\"}")
-        }
-
-        function onMessage(event) {
-
-            // Log the raw data
-            console.log(event.data);
 
             document.getElementById("out_list").innerHTML = "";
-            
-            // A message containing DTCs should have only one entry
-            // That one entry should be an array of any DTCs
-            var dtc_obj = JSON.parse(event.data);    // Create an object from the JSON
-            var key = Object.keys(dtc_obj)[0];      // There should only be one key, so get it
-            var dtc_list = dtc_obj[key];            // Get the list of strings
+            var loading_text = document.createElement("p");
+            loading_text.appendChild(document.createTextNode("Communicating with the vehicle..."));
+            output_display.appendChild(loading_text);
 
+            websocket.send("{\"cmd\": \"dtc_clear\"}");
+            last_cmd = "dtc_clear";
+        }
+
+        function display_dtc_list(dtc_list) {
             // Loop through the list of DTCs
             for(var i = 0; i < dtc_list.length; i++) {
                 
@@ -201,8 +199,49 @@
                 // Create a list entry and append to the list of DTCs being displayed
                 var dtc_entry = document.createElement("p");
                 dtc_entry.appendChild(document.createTextNode(dtc_list[i]));
-                dtc_display.appendChild(dtc_entry);
+                output_display.appendChild(dtc_entry);
             }
+        }
+
+        function onMessage(event) {
+
+            // Log the raw data
+            console.log(event.data);
+
+            if( last_cmd.length === 0 ) {
+                console.log("Was not expecting a response, last command is empty");
+                return;
+            }
+
+            document.getElementById("out_list").innerHTML = "";
+            
+            // The 0th key/value should be "rsp": "[original command]"
+            // If rsp = dtc_list, the next key should be "codes" and contain a list of DTC strings
+            // If rsp = dtc_clear, the next key should just be a single string
+
+            var response_obj = JSON.parse(event.data);   // Create an object from the JSON
+            var key_0 = Object.keys(response_obj)[0];    // Extract 0th key
+            var key_1 = Object.keys(response_obj)[1];    // Extract 1st key
+            var response_type = response_obj[key_0];     // Extract response type
+
+            if( response_type.localeCompare("dtc_list") == 0 && last_cmd.localeCompare(response_type) == 0 ) {
+                console.log("Response was for a DTC request");
+                display_dtc_list(response_obj[key_1]);
+                last_cmd = "";
+                return;
+            }
+
+            if( response_type.localeCompare("dtc_clear") == 0 && last_cmd.localeCompare(response_type) == 0 ) {
+                console.log("Response was for a clear DTC request");
+                var new_entry = document.createElement("p");
+                new_entry.appendChild(document.createTextNode(response_obj[key_1]));
+                output_display.appendChild(new_entry);
+                last_cmd = "";
+                return;
+            }
+
+            console.log("Unknown response type " + response_type);
+
         }
 
     </script>
