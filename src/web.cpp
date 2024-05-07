@@ -5,6 +5,7 @@
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
 #include "driver/twai.h"
+#include "ESPTrueRandom.h"
 
 #include "iso_tp.hpp"
 #include "obd.hpp"
@@ -187,25 +188,15 @@ void ws_send_pids() {
 // Uses the OBD-II library to get the PID values being currently monitored and sends a response in the expected JSON format
 void ws_send_vals() {
 
-    /* 
-    -> Expected JSON format:
-        {
-            "rsp": "pid_vals",
-            "pid_a": 255,
-            "pid_b": 255,
-            "pid_c": 255
-        }
-    */
-
     // Clear document and add response
     json_document.clear();
     memset(json_string, 0, JSON_STR_LEN);
     json_document["rsp"] = "pid_vals";
 
-    // Get the pid vals eventually, for now send 255's
-    json_document["pid_a"] = 255;
-    json_document["pid_b"] = 255;
-    json_document["pid_c"] = 255;
+    // Get the pid vals eventually, for now send random vals
+    json_document["pid_a"] = (uint8_t)(ESPTrueRandom.randomByte());
+    json_document["pid_b"] = (uint8_t)(ESPTrueRandom.randomByte());
+    json_document["pid_c"] = (uint8_t)(ESPTrueRandom.randomByte());
 
     // Send response
     if( serializeJson(json_document, json_string, JSON_STR_LEN) > 0 ) {
@@ -217,17 +208,18 @@ void ws_send_vals() {
 // Changes the locally held variables determining what PID values to monitor
 void ws_change_mon() {
 
-    /* 
-    -> Expected JSON format:
-        {
-            "cmd": "change_mon",
-            "pid_a": 255,
-            "pid_b": 255,
-            "pid_c": 255
-        }
-    -> Should still be stored in the json_document object
-    -> Doesn't send a response
-    */
+    // Extract char arrays
+    const char* temp_a = json_document["pid_a"];
+    const char* temp_b = json_document["pid_b"];
+    const char* temp_c = json_document["pid_c"];
+
+    // Make string objects so we can parse
+    String STR_A(temp_a, strlen(temp_a));
+    String STR_B(temp_a, strlen(temp_b));
+    String STR_C(temp_a, strlen(temp_c));
+
+    // Print parsed values
+    Serial.printf("[WEB] Received PIDs %02X %02X %02X\n", STR_A.toInt(), STR_B.toInt(), STR_C.toInt());
 
 }
 
