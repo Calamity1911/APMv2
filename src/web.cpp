@@ -224,13 +224,32 @@ void ws_send_pids() {
 // Uses the OBD-II library to get the PID values being currently monitored and sends a response in the expected JSON format
 void ws_send_vals() {
 
-    /*
-        Format:
+    /* Expected JSON Format
         {
             "rsp": "pid_vals",
             "names": [three pid names],
             "vals": [three pid vals]
         }
+    */
+
+    /* Eventual control flow
+
+        json_document["rsp"] = "pid_vals";
+        
+        // Repeat for B and C
+        char temp_str[64]
+        get_pid_name(MONITOR_A, temp_str) // Check for fail
+        names.add(temp_str)
+
+        // Repeat for B and C
+        char decode_formula = get_pid_formula(MONITOR_A) // Check for fail
+        uint32_t data_len = 8
+        uint8_t  data_buf[data_len]
+        obd_get_pid(MONITOR_A, data_buf, &data_len) // Check for fail
+        obd_errchk(data_buf) // Check for fail
+        remove_front(data_buf) // Unsure how many times for PIDs, I think two?
+        switch(decode_formula)
+            vals.add(String(pid_formula_x(data_buf, data_len)))
     */
 
     // Clear document and add response

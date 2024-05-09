@@ -14,6 +14,7 @@ esp_err_t poll_all_pids();
 
 bool get_pid_name(uint8_t PID, char out[64]);
 char get_pid_formula(uint8_t PID);
+esp_err_t obd_get_pid(uint8_t PID, uint8_t* rx_data, uint32_t* rx_len);
 
 /* All of the formulas for converting raw ISO-TP data below */
 
