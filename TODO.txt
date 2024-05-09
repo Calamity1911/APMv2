@@ -1,14 +1,10 @@
-TODO's 5/5/2024
+TODO's 5/9/2024
 
 * Rewrite/port main APM OBD-II library as a static (not a task) library
 	-> Still working on OBD lib, see obd_get_pid()
-	-> Maybe use a dictionary like the DTCs to store PIDs
 	-> Need to test the PID polling functions
 
-* UI appears to be done in terms of layout, but still need to write the
-  javascript to handle the PID/sensor functionality
-	-> See the websocket functions from web.cpp lines 176 to 232
-	   for both the json formatting and expected response stuff
+* UI Basically complete, task has placeholder functionality until OBD lib is complete
   
 * Also note that the ESP32-S3 dev kits from senior design were actually N8R2 / P2N8
   meaning they only have 8MB Flash and 2MB PSRAM when they were advertised as N16R8.
