@@ -1,0 +1,22 @@
+004: Calculated Engine Load, %
+005: Engine Coolant Temperature, °C
+010: Fuel Rail Pressure, kPa
+011: Intake Manifold Pressure, kPa
+012: Engine RPM
+013: Wheel Speed, km/h
+014: Ignition Timing Advance, degrees
+015: Intake Air Temperature, °C
+017: Throttle Position Sensor, %
+031: Engine Run Time, seconds
+044: Commanded Exhaust Gas Recirculation (EGR), %
+045: Exhaust Gas Recirculation (EGR) Error, %
+046: Commanded Evaporative Purge, %
+047: Fuel Level Sensor, %
+051: Barometric Pressure, kPa
+066: Control Module Voltage
+070: Ambient Air Temperature, °C
+082: Fuel Ethanol Percent
+091: Hybrid/EV Battery Pack Remaining Charge, %
+092: Engine Oil Temperature, °C
+093: Fuel Injection Timing, Degrees
+094: Fuel Consumption Rate, L/h

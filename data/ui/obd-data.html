@@ -125,17 +125,17 @@
             </div>
 
             <div class="output">
-                <span id="pid_a">[sensor pending]</span>
+                <span id="name_a">[sensor pending]</span>
                 <span id="out_a">[value pending]</span>
             </div>
 
             <div class="output">
-                <span id="pid_b">[sensor pending]</span>
+                <span id="name_b">[sensor pending]</span>
                 <span id="out_b">[value pending]</span>
             </div>
             
             <div class="output">
-                <span id="pid_c">[sensor pending]</span>
+                <span id="name_c">[sensor pending]</span>
                 <span id="out_c">[value pending]</span>
             </div>
 
@@ -158,9 +158,140 @@
         </div>
 
         <script>
-            function change_monitor() {
-                alert("Not yet implemented");
+
+            // Websocket stuff
+            var gateway = `ws://${window.location.hostname}/obd-ws`;
+            var websocket;
+            window.addEventListener('load', onload);
+
+            // Dropdowns where PIDs will be listed
+            var list_a = document.getElementById("in_a");
+            var list_b = document.getElementById("in_b");
+            var list_c = document.getElementById("in_c");
+
+            // Where the PID names will be displayed
+            var name_a = document.getElementById("name_a");
+            var name_b = document.getElementById("name_b");
+            var name_c = document.getElementById("name_c");
+
+            // Where the RX'd values will be displayed
+            var out_a = document.getElementById("out_a");
+            var out_b = document.getElementById("out_b");
+            var out_c = document.getElementById("out_c");
+
+            // Last issued command
+            var last_cmd = "";
+
+            function onload(event) {
+                initWebSocket();
             }
+
+            function initWebSocket() {
+                console.log('Trying to open a WebSocket connection…');
+                websocket = new WebSocket(gateway);
+                websocket.onopen = onOpen;
+                websocket.onclose = onClose;
+                websocket.onmessage = onMessage;
+            }
+
+            function onOpen(event) {
+                console.log('WebSocket Connection opened');
+
+                // Send the message to get PIDs
+                websocket.send("{\"cmd\": \"list_pids\"}");
+                last_cmd = "list_pids"
+            }
+
+            function onClose(event) {
+                console.log('Connection closed');
+                setTimeout(initWebSocket, 2000);
+            }
+
+            function onMessage(event) {
+
+                var response_obj = JSON.parse(event.data);   // Create an object from the JSON
+                var key_0 = Object.keys(response_obj)[0];    // Extract 0th key
+                var key_1 = Object.keys(response_obj)[1];    // Extract 1st key
+                var response_type = response_obj[key_0];     // Extract response type
+
+                // Server sent us supported PIDs
+                if( response_type.localeCompare("list_pids") == 0 && last_cmd.localeCompare(response_type) == 0 ) {
+                    console.log(event.data);
+                    var key_2 = Object.keys(response_obj)[2];    // Extract 2nd key
+                    update_supported(response_obj[key_1], response_obj[key_2]);
+                }
+
+                // Server sent us new PID values
+                if( response_type.localeCompare("pid_vals") == 0 ) {
+                    var key_2 = Object.keys(response_obj)[2];    // Extract 2nd key
+                    update_values(response_obj[key_1], response_obj[key_2]);
+                }
+
+            }
+
+            function update_supported(name_list, num_list) {
+
+                // Assert lists are same length
+                if( !(name_list.length === num_list.length) ) {
+                    console.log("List of PID names and values aren't the same length");
+                    return;
+                }
+
+                // Clear elements from dropdown
+                list_a.innerHTML = "";
+                list_b.innerHTML = "";
+                list_c.innerHTML = "";
+
+                // Append new lists
+                for(var i = 0; i < name_list.length; i++) {
+                    list_a.options[list_a.options.length] = new Option(name_list[i], num_list[i]);
+                    list_b.options[list_b.options.length] = new Option(name_list[i], num_list[i]);
+                    list_c.options[list_c.options.length] = new Option(name_list[i], num_list[i]);
+                }
+
+            }
+
+            function update_values(name_list, value_list) {
+
+                // Ensure lengths match
+                if( !(name_list.length === value_list.length) ) {
+                    console.log("List of PID names and values do not have the same length");
+                    return;
+                }
+
+                // Ensure there are three entries
+                if( !(name_list.length === 3) ) {
+                    console.log("Received PID lists wrong length");
+                    return;
+                }
+
+                // Extract and update names
+                name_a.innerHTML = name_list[0];
+                name_b.innerHTML = name_list[1];
+                name_c.innerHTML = name_list[2];
+
+                // Extract and update values
+                out_a.innerHTML = value_list[0];
+                out_b.innerHTML = value_list[1];
+                out_c.innerHTML = value_list[2];
+
+            }
+
+            function change_monitor() {
+
+                // Build the request to change values
+                var request = {};
+                request["cmd"] = "change_mon";
+                request["pid_a"] = list_a.value;
+                request["pid_b"] = list_b.value;
+                request["pid_c"] = list_c.value;
+                console.log(JSON.stringify(request));
+
+                websocket.send(JSON.stringify(request));
+
+            }
+
+
         </script>
 
     </body>

@@ -179,28 +179,79 @@ void ws_send_pids() {
     -> Expected JSON format:
         {
             "rsp": "list_pids",
-            "pids": [string list]
+            "names": [string list],
+            "pids": [bytes]
         }
     */
+
+    // Clear document and add response
+    json_document.clear();
+    memset(json_string, 0, JSON_STR_LEN);
+    json_document["rsp"] = "list_pids";
+
+    JsonArray pid_names = json_document["names"].to<JsonArray>();
+    JsonArray pid_nums = json_document["pids"].to<JsonArray>();
+
+    pid_names.add("Engine Load, %");
+    pid_nums.add(4);
+
+    pid_names.add("Engine Coolant Temperature, °C");
+    pid_nums.add(5);
+
+    pid_names.add("Fuel Rail Pressure, kPa");
+    pid_nums.add(10);
+
+    pid_names.add("Engine RPM");
+    pid_nums.add(12);
+
+    pid_names.add("Ignition Timing Advance, degrees");
+    pid_nums.add(14);
+
+    if( serializeJson(json_document, json_string, JSON_STR_LEN) > 0 ) {
+        obd_ws.textAll(json_string);
+    }
+    
 }
 
 // Builds a response to a "get_vals" command from the client and sends it over the websocket
 // Uses the OBD-II library to get the PID values being currently monitored and sends a response in the expected JSON format
 void ws_send_vals() {
 
+    /*
+        Format:
+        {
+            "rsp": "pid_vals",
+            "names": [three pid names],
+            "vals": [three pid vals]
+        }
+    */
+
     // Clear document and add response
     json_document.clear();
     memset(json_string, 0, JSON_STR_LEN);
     json_document["rsp"] = "pid_vals";
 
-    // Get the pid vals eventually, for now send random vals
-    json_document["pid_a"] = (uint8_t)(ESPTrueRandom.randomByte());
-    json_document["pid_b"] = (uint8_t)(ESPTrueRandom.randomByte());
-    json_document["pid_c"] = (uint8_t)(ESPTrueRandom.randomByte());
+    // Create lists
+    JsonArray names = json_document["names"].to<JsonArray>();
+    JsonArray vals = json_document["vals"].to<JsonArray>();
+
+    // Append PID names
+    names.add("Placeholder A");
+    names.add("Placeholder B");
+    names.add("Placeholder C");
+
+    // Append PID values
+    vals.add(String(255));
+    vals.add(String(255));
+    vals.add(String(255));
+
+    uint32_t length = serializeJson(json_document, json_string, JSON_STR_LEN);
 
     // Send response
-    if( serializeJson(json_document, json_string, JSON_STR_LEN) > 0 ) {
+    if( length > 0 ) {
         obd_ws.textAll(json_string);
+    } else {
+        Serial.printf("[WEB] Failed to serialize\n");
     }
 
 }
@@ -213,13 +264,8 @@ void ws_change_mon() {
     const char* temp_b = json_document["pid_b"];
     const char* temp_c = json_document["pid_c"];
 
-    // Make string objects so we can parse
-    String STR_A(temp_a, strlen(temp_a));
-    String STR_B(temp_a, strlen(temp_b));
-    String STR_C(temp_a, strlen(temp_c));
-
     // Print parsed values
-    Serial.printf("[WEB] Received PIDs %02X %02X %02X\n", STR_A.toInt(), STR_B.toInt(), STR_C.toInt());
+    Serial.printf("[WEB] Received PIDs %02X %02X %02X\n", atoi(temp_a), atoi(temp_b), atoi(temp_c));
 
 }
 
@@ -367,9 +413,15 @@ void init_webserver() {
 		Serial.println("[WEB] Served DTC page");
 	});
 
+    // Explicit request for the OBD Data page
+    web_server.on("/obd-data.html", HTTP_ANY, [](AsyncWebServerRequest *request) {
+		request->send(SPIFFS, "/ui/obd-data.html", "text/html");
+		Serial.println("[WEB] Served OBD Data page");
+	});
+
     // 404
 	web_server.onNotFound([](AsyncWebServerRequest *request) {
-		request->send(404);
+		request->send(404, "text/html", "404: Not Found");
         Serial.printf( "[WEB] Served 404: %s\n", request->url().c_str() );
 	});
 
