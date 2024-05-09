@@ -23,6 +23,8 @@ void obd_dict_check() {
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
+    Serial.printf("[OBD] Dictionary checks passed!\n");
+
 }
 
 // Removes 0th element and shifts remaining data over
@@ -509,15 +511,16 @@ char get_pid_formula(uint8_t PID) {
     // Loop until EOF
     while(!line.isEmpty()) {
 
-        // Extract current line
-        String current_pid = line.substring(0, 2);
+        char current_pid[4] = {0};
+        current_pid[0] = line.c_str()[0];
+        current_pid[1] = line.c_str()[1];
+        current_pid[2] = line.c_str()[2];
         
         // Compare provided PID to PID of the line
-        if( PID == current_pid.toInt() ) {
+        if( PID == atoi(current_pid) ) {
             
             // If they match, extract formula indicator and break/return
             decoded_formula = line.charAt(5);
-            Serial.printf("[OBD] Found formula %c for PID %02X\n", decoded_formula, PID);
             break;
         }
 
@@ -545,9 +548,12 @@ bool get_pid_name(uint8_t PID, char out[64]) {
 
     while(!line.isEmpty()) {
 
-        String current_pid = line.substring(0, 2);
+        char current_pid[4] = {0};
+        current_pid[0] = line.c_str()[0];
+        current_pid[1] = line.c_str()[1];
+        current_pid[2] = line.c_str()[2];
 
-        if( PID == current_pid.toInt() ) {
+        if( PID == atoi(current_pid) ) {
             String decoded = line.substring(5);
             strncpy(out, decoded.c_str(), 64);
             was_decoded = true;
