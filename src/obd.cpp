@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <SPIFFS.h>
 #include "driver/twai.h"
 #include "iso_tp.hpp"
 #include "obd.hpp"
@@ -9,6 +10,20 @@ uint8_t POLL_PIDS[3];
 
 // Only supporting PIDs 0x00 thru 0x7F = 128 PIDs
 uint8_t SUPPORTED_PIDS[256];
+
+void obd_dict_check() {
+    
+    if(!SPIFFS.exists("/pid/supported.txt")) {
+        Serial.printf("[OBD] PID name dictionary doesn't exist\n");
+        while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
+    }
+
+    if(!SPIFFS.exists("/pid/formulas.txt")) {
+        Serial.printf("[OBD] PID formula dictionary doesn't exist\n");
+        while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
+    }
+
+}
 
 // Removes 0th element and shifts remaining data over
 void remove_front(uint8_t* data, uint32_t* len) {
@@ -478,3 +493,129 @@ esp_err_t obd_get_pid(uint8_t PID, uint8_t* rx_data, uint32_t* rx_len) {
     return ESP_OK;
 }
 
+// Utilizes PID dictionary to find the formula for the provided PID
+// Returns null char if not found
+char get_pid_formula(uint8_t PID) {
+    
+    // Decoded formula indicator
+    char decoded_formula = '\0';
+
+    // Open dictionary
+    File dict = SPIFFS.open("/pid/formulas.txt");
+
+    // Read first line
+    String line = dict.readStringUntil('\n');
+
+    // Loop until EOF
+    while(!line.isEmpty()) {
+
+        // Extract current line
+        String current_pid = line.substring(0, 2);
+        
+        // Compare provided PID to PID of the line
+        if( PID == current_pid.toInt() ) {
+            
+            // If they match, extract formula indicator and break/return
+            decoded_formula = line.charAt(5);
+            Serial.printf("[OBD] Found formula %c for PID %02X\n", decoded_formula, PID);
+            break;
+        }
+
+        // Advance to next line
+        line = dict.readStringUntil('\n');
+    }
+
+    // Close dictionary
+    dict.close();
+    
+    // Return decoded formula indicator, if any
+    return decoded_formula;
+}
+
+// Utilizes PID dictionary to find the string/name for the provided PID
+bool get_pid_name(uint8_t PID, char out[64]) {
+
+    bool was_decoded = false;
+    
+    memset(out, 0, 64);
+
+    File dict = SPIFFS.open("/pid/supported.txt");
+
+    String line = dict.readStringUntil('\n');
+
+    while(!line.isEmpty()) {
+
+        String current_pid = line.substring(0, 2);
+
+        if( PID == current_pid.toInt() ) {
+            String decoded = line.substring(5);
+            strncpy(out, decoded.c_str(), 64);
+            was_decoded = true;
+            break;
+        }
+
+        line = dict.readStringUntil('\n');
+    }
+
+    return was_decoded;
+}
+
+// Sentinel value of INT32_MIN = Invalid
+int32_t pid_formula_a(uint8_t* data, uint32_t len) {
+    return len > 1 ? data[0] : INT32_MIN;
+}
+
+// Sentinel value of INT32_MIN = Invalid
+int32_t pid_formula_b(uint8_t* data, uint32_t len) {
+    return len > 1 ? (data[0] - 40) : INT32_MIN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_c(uint8_t* data, uint32_t len) {
+    return len > 1 ? (data[0]/2.55f) : NAN;
+}
+
+// Sentinel value of INT32_MIN = Invalid
+int32_t pid_formula_d(uint8_t* data, uint32_t len) {
+    return len > 1 ? (data[0] * 3) : INT32_MIN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_e(uint8_t* data, uint32_t len) {
+    return len > 1 ? ((data[0] / 2.0f) * 64) : NAN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_f(uint8_t* data, uint32_t len) {
+    return len > 1 ? ((data[0] / 1.28f) - 100) : NAN;
+}
+
+// Sentinel value of INT32_MIN = Invalid
+int32_t pid_formula_g(uint8_t* data, uint32_t len) {
+    return len > 2 ? ((256 * data[0]) + data[1]) : INT32_MIN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_h(uint8_t* data, uint32_t len) {
+    return len > 2 ? (pid_formula_g(data, len) / 4.0f) : NAN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_i(uint8_t* data, uint32_t len) {
+    return len > 2 ? (pid_formula_g(data, len) / 100.0f) : NAN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_j(uint8_t* data, uint32_t len) {
+    return len > 2 ? (pid_formula_g(data, len) / 1000.0f) : NAN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_k(uint8_t* data, uint32_t len) {
+    return len > 2 ? ((pid_formula_g(data, len) / 128.0f) - 210) : NAN;
+}
+
+// Sentinel value of NAN = Invalid
+float pid_formula_l(uint8_t* data, uint32_t len) {
+    return len > 2 ? (pid_formula_g(data, len) / 20.0f) : NAN;
+}

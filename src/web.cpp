@@ -5,7 +5,6 @@
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
 #include "driver/twai.h"
-#include "ESPTrueRandom.h"
 
 #include "iso_tp.hpp"
 #include "obd.hpp"
@@ -20,15 +19,23 @@ char ssid[32];
 const char* password = NULL;
 char redirect_addr[32];
 
+// Webserver objects
 DNSServer dns_server;
 AsyncWebServer web_server(80);
 AsyncWebSocket dtc_ws("/dtc-ws");
 AsyncWebSocket obd_ws("/obd-ws");
 
+// Reusable JSON document
 JsonDocument json_document;
 
+// String to serialize JSON into
 #define JSON_STR_LEN 1024
 char json_string[JSON_STR_LEN] = {0};
+
+// PIDs to monitor via OBD-II
+uint8_t MONITOR_A;
+uint8_t MONITOR_B;
+uint8_t MONITOR_C;
 
 // Initializes DNS server. Unsure if this is needed for the captive portal, HTTP server, or both.
 void init_dns() {
@@ -259,13 +266,13 @@ void ws_send_vals() {
 // Changes the locally held variables determining what PID values to monitor
 void ws_change_mon() {
 
-    // Extract char arrays
-    const char* temp_a = json_document["pid_a"];
-    const char* temp_b = json_document["pid_b"];
-    const char* temp_c = json_document["pid_c"];
+    // Extract values from JSON
+    MONITOR_A = atoi(json_document["pid_a"]);
+    MONITOR_B = atoi(json_document["pid_b"]);
+    MONITOR_C = atoi(json_document["pid_c"]);
 
     // Print parsed values
-    Serial.printf("[WEB] Received PIDs %02X %02X %02X\n", atoi(temp_a), atoi(temp_b), atoi(temp_c));
+    Serial.printf("[WEB] Received request to monitor PIDs %02X %02X %02X\n", MONITOR_A, MONITOR_B, MONITOR_C);
 
 }
 

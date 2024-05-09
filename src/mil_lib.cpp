@@ -11,61 +11,61 @@ void check_dict_p() {
     
     // Check for the dictionary containing DTCs in the range P00XX
     if(!SPIFFS.exists("/dtc/p_00.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P00XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P00XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P01XX
     if(!SPIFFS.exists("/dtc/p_01.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P01XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P01XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P02XX
     if(!SPIFFS.exists("/dtc/p_02.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P02XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P02XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P03XX
     if(!SPIFFS.exists("/dtc/p_03.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P03XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P03XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P04XX
     if(!SPIFFS.exists("/dtc/p_04.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P04XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P04XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P05XX
     if(!SPIFFS.exists("/dtc/p_05.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P05XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P05XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P06XX
     if(!SPIFFS.exists("/dtc/p_06.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P06XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P06XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P07XX
     if(!SPIFFS.exists("/dtc/p_07.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P07XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P07XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P08XX
     if(!SPIFFS.exists("/dtc/p_08.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P08XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P08XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 
     // Check for the dictionary containing DTCs in the range P09XX
     if(!SPIFFS.exists("/dtc/p_09.txt")) {
-        Serial.printf("[MIL] DTC/MIL library for PIDs P09XX do not exist\n");
+        Serial.printf("[MIL] DTC/MIL library for PIDs P09XX doesn't exist\n");
         while(1) {vTaskDelay(pdMS_TO_TICKS(1000));}
     }
 }

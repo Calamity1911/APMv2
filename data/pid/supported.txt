@@ -6,6 +6,7 @@
 013: Wheel Speed, km/h
 014: Ignition Timing Advance, degrees
 015: Intake Air Temperature, °C
+016: Mass Airflow Sensor Rate, g/s
 017: Throttle Position Sensor, %
 031: Engine Run Time, seconds
 044: Commanded Exhaust Gas Recirculation (EGR), %
